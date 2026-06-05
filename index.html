@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="img/lensa-saja.png">
+    <title>Lensa Hoax</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Istok+Web:wght@400;700&family=Poppins:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Iconify (untuk ikon) -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/navbar.css">
+    <link rel="stylesheet" href="/pencarian.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <style>
+        .flash-message {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            z-index: 9999;
+            min-width: 360px;
+            max-width: min(560px, calc(100vw - 32px));
+            padding: 18px 20px;
+            border-radius: 16px;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.2);
+            border: 1px solid transparent;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            line-height: 1.45;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+
+        .flash-message--success {
+            background: #ecfdf3;
+            color: #166534;
+            border-color: #86efac;
+        }
+
+        .flash-message--error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+
+        .flash-message__icon {
+            flex: 0 0 auto;
+            margin-top: 1px;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .flash-message__content {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .flash-message.is-hiding {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-8px);
+        }
+
+        @media (max-width: 640px) {
+            .flash-message {
+                top: 16px;
+                left: 16px;
+                right: 16px;
+                min-width: 0;
+                max-width: none;
+                transform: translateY(0);
+            }
+
+            .flash-message.is-hiding {
+                transform: translateY(-8px);
+            }
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+<!-- Desktop Navbar -->
+<header class="lh-navbar lh-navbar--desktop">
+    <!-- Logo -->
+    <a href="https://dwarf-cone-dash.ngrok-free.dev/" class="lh-logo lh-logo--desktop">
+        <img src="image/logo-lensa.png" alt="Logo Lensa Hoax" class="lh-logo__img">
+    </a>
+
+    <!-- Nav Icons -->
+    <nav class="lh-nav-icons lh-nav-icons--desktop" aria-label="Navigasi utama">
+        <!-- Beranda Utama (Aktif) -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/" class="lh-nav-btn lh-nav-btn--active" aria-label="Beranda Utama" aria-current="page">
+            <iconify-icon icon="mdi:home" width="24" height="24"></iconify-icon>
+            <span class="lh-nav-tooltip" role="tooltip">
+                <iconify-icon icon="mdi:home" width="17" height="17"></iconify-icon>
+                <span>Beranda Utama</span>
+            </span>
+        </a>
+
+        <!-- Pencarian Populer -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/pencarian-populer" class="lh-nav-btn" aria-label="Pencarian Terpopuler">
+            <iconify-icon icon="iconamoon:trend-up-fill" width="26" height="26"></iconify-icon>
+            <span class="lh-nav-tooltip" role="tooltip">
+                <iconify-icon icon="iconamoon:trend-up-fill" width="18" height="18"></iconify-icon>
+                <span>Pencarian Terpopuler</span>
+            </span>
+        </a>
+
+        <!-- Deteksi -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/deteksi" class="lh-nav-btn lh-nav-btn--search" aria-label="Pencarian">
+            <iconify-icon icon="mdi:magnify" width="24" height="24"></iconify-icon>
+            <span class="lh-nav-tooltip" role="tooltip">
+                <iconify-icon icon="mdi:magnify" width="17" height="17"></iconify-icon>
+                <span>Telusuri Informasi Berita</span>
+            </span>
+        </a>
+
+        <!-- WhatsApp -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/whatsapp" class="lh-nav-btn" aria-label="WhatsApp">
+            <iconify-icon icon="garden:whatsapp-fill-16" width="24" height="24"></iconify-icon>
+            <span class="lh-nav-tooltip" role="tooltip">
+                <iconify-icon icon="garden:whatsapp-fill-16" width="18" height="18"></iconify-icon>
+                <span>Dapatkan Melalui Whatsapp</span>
+            </span>
+        </a>
+
+        <!-- Daftar / Masuk (Unauthenticated State) -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/login" class="lh-nav-btn lh-nav-btn--user" aria-label="Daftar atau Masuk">
+            <iconify-icon icon="mdi:user" width="26" height="26"></iconify-icon>
+            <span class="lh-nav-tooltip lh-nav-tooltip--left" role="tooltip">
+                <iconify-icon icon="mdi:user" width="18" height="18"></iconify-icon>
+                <span>Daftar | Masuk</span>
+            </span>
+        </a>
+    </nav>
+</header>
+
+<!-- Mobile: Top Navbar -->
+<header class="lh-navbar lh-navbar--mobile-top">
+    <a href="https://dwarf-cone-dash.ngrok-free.dev/" class="lh-logo lh-logo--mobile-top" aria-label="Kembali ke Beranda">
+        <img src="image/logo-lensa.png" alt="Logo Lensa Hoax" class="lh-logo__img">
+    </a>
+
+    <div class="lh-nav-icons--mobile-top">
+        <!-- Daftar / Masuk -->
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/login" class="lh-nav-btn lh-nav-btn--user-top" aria-label="Daftar atau Masuk">
+            <iconify-icon icon="mdi:user" width="24" height="24"></iconify-icon>
+        </a>
+    </div>
+</header>
+
+<!-- Mobile: Bottom Navbar -->
+<header class="lh-navbar lh-navbar--mobile">
+    <nav class="lh-nav-icons lh-nav-icons--mobile" aria-label="Navigasi utama">
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/" class="lh-nav-btn lh-nav-btn--active" aria-label="Beranda Utama" aria-current="page">
+            <iconify-icon icon="mdi:home" width="24" height="24"></iconify-icon>
+        </a>
+        
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/pencarian-populer" class="lh-nav-btn" aria-label="Pencarian Terpopuler">
+            <iconify-icon icon="iconamoon:trend-up-fill" width="26" height="26"></iconify-icon>
+        </a>
+        
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/deteksi" class="lh-nav-btn lh-nav-btn--search" aria-label="Pencarian">
+            <iconify-icon icon="mdi:magnify" width="24" height="24"></iconify-icon>
+        </a>
+        
+        <a href="https://dwarf-cone-dash.ngrok-free.dev/whatsapp" class="lh-nav-btn" aria-label="WhatsApp">
+            <iconify-icon icon="garden:whatsapp-fill-16" width="24" height="24"></iconify-icon>
+        </a>
+    </nav>
+</header>
+
+
+    <section class="hero">
+        <div class="container hero-flex">
+
+            <div class="hero-text">
+                <h1>Lensa Hoax:<br>Verifikasi Informasi dan Keaslian Foto dengan AI</h1>
+                <p>Jangan mudah percaya berita yang belum tentu benar. Pastikan keaslian teks berita dan foto kejadian
+                    dengan sistem deteksi cerdas kami.</p>
+
+                <div class="hero-btn">
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/dapatkan-whatsapp" class="btn-red"
+                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fab fa-whatsapp"></i> Dapatkan melalui Whatsapp
+                    </a>
+
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/pencarian" class="btn-outline"
+                        style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                        Coba Sekarang !
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-img">
+                <img src="image/landing-page.png" alt="Ilustrasi Hero Lensa Hoax">
+            </div>
+
+        </div>
+    </section>
+
+    <div class="hero-border"></div>
+
+
+    <section class="statistics-section">
+        <div class="container stats-grid">
+            <div class="stat-card">
+                <h3>500</h3>
+                <p>Informasi Terverifikasi</p>
+            </div>
+            <div class="stat-card">
+                <h3>75%</h3>
+                <p>Hoax Terdeteksi</p>
+            </div>
+            <div class="stat-card">
+                <h3>2000</h3>
+                <p>Data Hoax</p>
+            </div>
+            <div class="stat-card">
+                <h3>100</h3>
+                <p>Pengguna Terdaftar</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-to-use-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Cara Menggunakan</h2>
+                <p>Hanya empat langkah sederhana untuk memastikan kebenaran informasi Anda.</p>
+            </div>
+
+            <div class="stepper-wrapper">
+                <div class="stepper-line"></div>
+
+                <div class="step-item">
+                    <div class="step-icon-box">
+                        <span class="material-symbols-outlined">login</span>
+                    </div>
+                    <h4>1. Masuk Menu</h4>
+                    <p>Akses bagian pencarian di platform kami.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-icon-box">
+                        <span class="material-symbols-outlined">edit_note</span>
+                    </div>
+                    <h4>2. Input Data</h4>
+                    <p>Masukkan teks berita atau unggah foto yang mencurigakan.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-icon-box">
+                        <span class="material-symbols-outlined">ads_click</span>
+                    </div>
+                    <h4>3. Klik Telusuri</h4>
+                    <p>Biarkan teknologi AI kami bekerja memproses informasi tersebut.</p>
+                </div>
+
+                <div class="step-item">
+                    <div class="step-icon-box">
+                        <span class="material-symbols-outlined">verified</span>
+                    </div>
+                    <h4>4. Tunggu Hasil</h4>
+                    <p>Dapatkan laporan detail tingkat keaslian informasi Anda.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="main-features-section">
+        <div class="container">
+            <div class="features-header">
+                <h2>Fitur Utama</h2>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">drag_handle</span>
+                    </div>
+                    <h3>Deteksi Narasi</h3>
+                    <p>Menganalisis pola kalimat dan membandingkan dengan database berita terpercaya.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">image_search</span>
+                    </div>
+                    <h3>Keaslian Gambar</h3>
+                    <p>Memeriksa metadata dan jejak manipulasi digital pada foto secara forensik.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">
+                            login
+                        </span>
+                    </div>
+
+                    <h3>Integrasi Google</h3>
+                    <p>Masuk dengan mudah menggunakan akun Google untuk menyimpan riwayat Anda.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">history</span>
+                    </div>
+                    <h3>Riwayat Verifikasi</h3>
+                    <p>Kelola dan lihat kembali semua hasil verifikasi yang pernah Anda lakukan.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">trending_up</span>
+                    </div>
+                    <h3>Pencarian Populer</h3>
+                    <p>Pantau isu-isu hoax yang sedang hangat diperbincangkan publik.</p>
+                </div>
+
+                <div class="feature-card border-green">
+                    <div class="feature-icon-wrapper bg-soft-green">
+                        <span class="material-symbols-outlined icon-green">chat</span>
+                    </div>
+                    <h3>WhatsApp Bot</h3>
+                    <p>Verifikasi cepat lewat chat WhatsApp tanpa perlu buka website.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">sms_failed</span>
+                    </div>
+                    <h3>Sistem Feedback</h3>
+                    <p>Bantu tingkatkan akurasi AI kami dengan memberikan konfirmasi hasil.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper bg-soft-red">
+                        <span class="material-symbols-outlined icon-red">psychology</span>
+                    </div>
+                    <h3>Penjelasan</h3>
+                    <p>Dapatkan alasan logis di balik setiap kesimpulan verifikasi yang diberikan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="why-us-section">
+        <div class="container why-us-flex">
+
+            <div class="why-us-content">
+                <h2>Kenapa Lensa Hoax?</h2>
+
+                <div class="why-item">
+                    <div class="why-icon-box">
+                        <span class="material-symbols-outlined">bolt</span>
+                    </div>
+                    <div class="why-text">
+                        <h4>Instan</h4>
+                        <p>Hasil keluar dalam hitungan detik setelah data diinput.</p>
+                    </div>
+                </div>
+
+                <div class="why-item">
+                    <div class="why-icon-box">
+                        <span class="material-symbols-outlined">target</span>
+                    </div>
+                    <div class="why-text">
+                        <h4>Akurat</h4>
+                        <p>Menggunakan sistem analisis berlapis untuk hasil yang terpercaya.</p>
+                    </div>
+                </div>
+
+                <div class="why-item">
+                    <div class="why-icon-box">
+                        <span class="material-symbols-outlined">touch_app</span>
+                    </div>
+                    <div class="why-text">
+                        <h4>Mudah</h4>
+                        <p>Antarmuka minimalis yang ramah untuk semua kalangan usia.</p>
+                    </div>
+                </div>
+
+                <div class="why-item">
+                    <div class="why-icon-box">
+                        <span class="material-symbols-outlined">info</span>
+                    </div>
+                    <div class="why-text">
+                        <h4>Informatif</h4>
+                        <p>Laporan lengkap mencakup sumber asli dan alasan deteksi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="why-us-media">
+                <img src="image/data-statistik.png" alt="Ilustrasi Kenapa Memilih Lensa Hoax">
+            </div>
+
+        </div>
+    </section>
+
+    <section class="team-section">
+        <div class="container">
+            <div class="team-header">
+                <h2>Tim Pengembang</h2>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="avatar-wrapper">
+                        <img src="image/landing/pur.jpeg" alt="Foto Purnama Rizky Nugraha">
+                    </div>
+                    <h3>Purnama Rizky Nugraha</h3>
+                    <p class="role">Project Manager & AI Engineer</p>
+
+                    <div class="team-socials">
+                        <a href="https://purnama-ridzky-n.vercel.app/" class="social-icon"
+                            title="Website/Portofolio">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:purnamanugara492@gmail.com" class="social-icon" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="avatar-wrapper">
+                        <img src="image/landing/adin.jpg" alt="Foto Adinda Ivanka Maysanda Putri">
+                    </div>
+                    <h3>Adinda Ivanka Maysanda Putri</h3>
+                    <p class="role">Frontend Developer</p>
+
+                    <div class="team-socials">
+                        <a href="https://adindaivankamp.github.io/portofolio/" class="social-icon"
+                            title="Website/Portofolio">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:adindaivankamaysandaputri@gmail.com" class="social-icon" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="avatar-wrapper">
+                        <img src="image/landing/desi-karmila.jpeg" alt="Foto Desi Karmila">
+                    </div>
+                    <h3>Desi Karmila</h3>
+                    <p class="role">Frontend Developer</p>
+
+                    <div class="team-socials">
+                        <a href="https://portofolio-pink-pi.vercel.app/" class="social-icon"
+                            title="Website/Portofolio">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:desikarmila211@gmail.com" class="social-icon" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="avatar-wrapper">
+                        <img src="image/landing/Fauzi.png" alt="Foto Muhammad Reishi Fauzi Auguri">
+                    </div>
+                    <h3>Muhammad Reishi Fauzi Auguri</h3>
+                    <p class="role">Backend Developer</p>
+                    <div class="team-socials">
+                        <a href="https://github.com/mrfauzii" class="social-icon" title="Website/Portofolio">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:email@kamu.com" class="social-icon" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <div class="avatar-wrapper">
+                        <img src="image/landing/user-3296_256.png" alt="Foto Firman Dzaki Rahman">
+                    </div>
+                    <h3>Firman Dzaki Rahman</h3>
+                    <p class="role">Backend Developer</p>
+                    <div class="team-socials">
+                        <a href="#" class="social-icon" title="Website/Portofolio">
+                            <span class="material-symbols-outlined">language</span>
+                        </a>
+                        <a href="mailto:email@kamu.com" class="social-icon" title="Email">
+                            <span class="material-symbols-outlined">mail</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-banner-section">
+        <div class="cta-banner__container">
+            <h2 class="cta-banner__title">Sudah Siap Melawan Hoax?</h2>
+            <p class="cta-banner__description">
+                Bergabunglah bersama ribuan pengguna lainnya dalam menciptakan ruang digital yang bersih dan terpercaya.
+            </p>
+
+            <!-- Tombol Aksi -->
+            <div class="cta-banner__action">
+                <a href="https://dwarf-cone-dash.ngrok-free.dev/pencarian" class="cta-banner__button">Coba Sekarang
+                    !</a>
+            </div>
+        </div>
+    </section>
+
+    <footer
+        style="
+    width:100%;
+    display:block;
+    background: linear-gradient(90deg, #73070B 0%, #B8201D 100%);
+    color:white;
+    font-family:'Poppins', sans-serif;
+    margin-top:50px;
+    align-self:stretch;
+    box-sizing:border-box;
+    position: relative; /* TAMBAHKAN BARIS INI */
+    z-index: 2;
+">
+
+        <div
+            style="
+        width:min(1200px, calc(100% - 40px));
+        margin:0 auto;
+        padding:45px 20px;
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:space-between;
+        gap:40px;
+        box-sizing:border-box;
+    ">
+
+            <!-- Logo / Desc -->
+            <div style="flex:1; min-width:260px;">
+
+                <h2
+                    style="
+                font-size:28px;
+                font-weight:700;
+                margin-bottom:12px;
+                color:#ffffff;
+                letter-spacing:0.5px;
+            ">
+                    Lensa Hoax
+                </h2>
+
+                <div
+                    style="
+                width:70px;
+                height:4px;
+                background:#ffd166;
+                border-radius:20px;
+                margin-bottom:16px;
+            ">
+                </div>
+
+                <p
+                    style="
+                color:#ffe5e5;
+                font-size:14px;
+                line-height:1.8;
+                max-width:360px;
+            ">
+                    Platform AI untuk mendeteksi berita palsu dari teks dan gambar.
+                    Mendukung integrasi WhatsApp dan penyimpanan riwayat pengguna.
+                </p>
+            </div>
+
+            <!-- Dokumentasi -->
+            <div style="min-width:200px;">
+
+                <h3
+                    style="
+                font-size:17px;
+                margin-bottom:16px;
+                font-weight:600;
+                color:white;
+            ">
+                    Dokumentasi
+                </h3>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/panduan"
+                        style="
+                    color:#ffe5e5;
+                    text-decoration:none;
+                    font-size:14px;
+                ">
+                        Panduan Pengguna
+                    </a>
+
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/faq"
+                        style="
+                    color:#ffe5e5;
+                    text-decoration:none;
+                    font-size:14px;
+                ">
+                        FAQ
+                    </a>
+
+                </div>
+            </div>
+
+            <!-- Informasi -->
+            <div style="min-width:200px;">
+
+                <h3
+                    style="
+                font-size:17px;
+                margin-bottom:16px;
+                font-weight:600;
+                color:white;
+            ">
+                    Informasi
+                </h3>
+
+                <div style="display:flex; flex-direction:column; gap:12px;">
+
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/tentang-kami"
+                        style="
+                    color:#ffe5e5;
+                    text-decoration:none;
+                    font-size:14px;
+                ">
+                        Tentang Kami
+                    </a>
+
+                    <a href="https://dwarf-cone-dash.ngrok-free.dev/kebijakan-privasi"
+                        style="
+                    color:#ffe5e5;
+                    text-decoration:none;
+                    font-size:14px;
+                ">
+                        Kebijakan Privasi
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom -->
+        <div
+            style="
+        width:100%;
+        border-top:1px solid rgba(255,255,255,0.15);
+        padding:18px;
+        text-align:center;
+        font-size:13px;
+        color:#ffe5e5;
+        background:rgba(0,0,0,0.12);
+        backdrop-filter:blur(4px);
+    ">
+            &copy; 2026 Lensa Hoax
+        </div>
+
+    </footer>
+
+    <script>
+        (function() {
+            const flashMessage = document.getElementById('flash-message');
+
+            if (!flashMessage) {
+                return;
+            }
+
+            window.setTimeout(() => {
+                flashMessage.classList.add('is-hiding');
+
+                window.setTimeout(() => {
+                    flashMessage.remove();
+                }, 350);
+            }, 5000);
+        })();
+    </script>
+</body>
+
+</html>
